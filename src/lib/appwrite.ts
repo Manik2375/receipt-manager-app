@@ -3,7 +3,8 @@ import { Client, Databases, Account } from "react-native-appwrite";
 export const client = new Client();
 client
   .setEndpoint(process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT ?? "")
-  .setProject(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ?? "") // Replace with your project ID
+  .setProject(process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ?? "")
+  .setDevKey(process.env.EXPO_PUBLIC_DEV_KEY ?? "")
   .setPlatform('com.receipt.manager.com');
 
 

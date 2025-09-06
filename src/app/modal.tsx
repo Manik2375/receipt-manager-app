@@ -5,11 +5,12 @@ import EditScreenInfo from "@/src/components/EditScreenInfo";
 import { Text, View } from "@/src/components/Themed";
 import { account } from "../lib/appwrite";
 import { ID } from "react-native-appwrite";
+import { Link } from "expo-router";
 
 export default function ModalScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
+      <Link href={"/(auth)"}><Text style={styles.title}>Modal</Text></Link>
       <View
         style={styles.separator}
         lightColor="#eee"
