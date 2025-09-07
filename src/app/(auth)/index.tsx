@@ -2,6 +2,7 @@ import { Alert, Pressable, StyleSheet, TextInput } from "react-native";
 import { Text, View } from "@/src/components/Themed";
 import { useState } from "react";
 import { z } from "zod";
+import { account } from "@/src/lib/appwrite";
 
 import authService from "@/src/services/auth";
 
@@ -26,7 +27,8 @@ export default function TabOneScreen() {
     }
 
     try {
-      await authService.signUp({ email, password });
+      await authService.logIn({ email, password });
+      Alert.alert("Logged in ");
     } catch (error) {
       Alert.alert("Problem signing up", String(error));
       console.log(error);
@@ -50,6 +52,30 @@ export default function TabOneScreen() {
       />
       <Pressable onPress={handleSignUp}>
         <Text style={styles.btn}>Sign up</Text>
+      </Pressable>
+      <Pressable
+        onPress={async () => {
+          try {
+            await account.deleteSession("current");
+            Alert.alert("Logged out successfully", "yay")
+          } catch (error) {
+            console.log("Logout error:", error);
+          }
+        }}
+      >
+        <Text style={styles.btn}>Log Out</Text>
+      </Pressable>
+      <Pressable onPress={async () => {
+        try {
+          console.log(await account.get());
+        } catch (error) {
+            console.log("Error getting user data", error)
+        }
+      }}>
+        <Text style={styles.btn}>Get current account details</Text>
+      </Pressable>
+      <Pressable onPress={authService.oAuthLogin}>
+        <Text style={styles.btn}>Sign up using google</Text>
       </Pressable>
     </View>
   );
@@ -75,5 +101,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     color: "white",
     fontWeight: "bold",
+    marginTop: 20,
   },
 });

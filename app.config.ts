@@ -7,7 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "receipttracker",
+  scheme: `appwrite-callback-${process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ?? ""}`,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   splash: {
