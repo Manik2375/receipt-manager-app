@@ -1,5 +1,11 @@
-import { account, databases } from "../lib/appwrite";
-import { AppwriteException, ID, OAuthProvider } from "react-native-appwrite";
+import { account, tablesDB } from "../lib/appwrite";
+import {
+  AppwriteException,
+  ID,
+  OAuthProvider,
+  Permission,
+  Role,
+} from "react-native-appwrite";
 
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
@@ -13,12 +19,32 @@ if (!DATABASE_ID) {
 const authService = {
   async signUp({ email, password }: { email: string; password: string }) {
     try {
-      await account.create(ID.unique(), email, password);
-      // await databases.createDocument(DATABASE_ID, "users", ID.unique(), {
-      //   name: "test",
-      //   email: email,
-      // });
+      const name = email.split("@")[0];
+      const userID = ID.unique();
+      await account.create({
+        userId: userID,
+        email,
+        password,
+        name,
+      });
+
+      // The action is completed despite the error. Have to work on verificiaton
+      await tablesDB.createRow({
+        databaseId: DATABASE_ID,
+        tableId: "users",
+        rowId: userID,
+        data: {
+          name,
+          email,
+        },
+        permissions: [
+          Permission.read(Role.any()),
+          Permission.write(Role.any()),
+          Permission.update(Role.any()),
+        ],
+      });
     } catch (error: unknown) {
+      console.error("Error in signUp service function\n",error);
       if (typeof error === "object" && error) {
         throw (error as AppwriteException).message;
       } else throw error;
@@ -31,11 +57,11 @@ const authService = {
 
       console.log("Redirect URI:", deepLink);
 
-      const loginUrl = await account.createOAuth2Token(
-        OAuthProvider.Google,
-        deepLink.toString(),
-        deepLink.toString()
-      );
+      const loginUrl = account.createOAuth2Token({
+        provider: OAuthProvider.Google,
+        success: deepLink.toString(),
+        failure: deepLink.toString(),
+      });
 
       console.log("Login URL:", String(loginUrl));
 
@@ -51,11 +77,38 @@ const authService = {
         if (!secret || !userId)
           throw new Error("Error logging in, no userID or secret");
 
-        await account.createSession(userId, secret);
+        await account.createSession({ userId, secret });
+
+        try {
+          await tablesDB.getRow({
+            databaseId: DATABASE_ID,
+            tableId: "users",
+            rowId: userId,
+          });
+        } catch (error) {
+          // currently assuming user not in database
+          const accountDetails = await account.get();
+          await tablesDB.createRow({
+            databaseId: DATABASE_ID,
+            tableId: "users",
+            rowId: userId,
+            data: {
+              name: accountDetails.name,
+              email: accountDetails.email,
+            },
+            permissions: [
+              Permission.read(Role.user(userId)),
+              Permission.write(Role.user(userId)),
+              Permission.update(Role.user(userId)),
+              Permission.delete(Role.user(userId)),
+            ],
+          });
+        }
       } else {
         console.log("Login canceled or failed:", result);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("Error in oAuth Login\n", error);
       if (typeof error === "object" && error) {
         throw (error as AppwriteException).message;
       } else throw error;
@@ -65,8 +118,9 @@ const authService = {
   async logIn({ email, password }: { email: string; password: string }) {
     try {
       console.log("Logging ", email);
-      await account.createEmailPasswordSession(email, password);
-    } catch (error) {
+      await account.createEmailPasswordSession({ email, password });
+    } catch (error: unknown) {
+      console.error("Error in login service function\n", error)
       if (typeof error === "object" && error) {
         throw (error as AppwriteException).message;
       } else throw error;

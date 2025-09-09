@@ -27,7 +27,7 @@ export default function TabOneScreen() {
     }
 
     try {
-      await authService.logIn({ email, password });
+      await authService.signUp({ email, password });
       Alert.alert("Logged in ");
     } catch (error) {
       Alert.alert("Problem signing up", String(error));
@@ -57,7 +57,7 @@ export default function TabOneScreen() {
         onPress={async () => {
           try {
             await account.deleteSession("current");
-            Alert.alert("Logged out successfully", "yay")
+            Alert.alert("Logged out successfully", "yay");
           } catch (error) {
             console.log("Logout error:", error);
           }
@@ -65,13 +65,18 @@ export default function TabOneScreen() {
       >
         <Text style={styles.btn}>Log Out</Text>
       </Pressable>
-      <Pressable onPress={async () => {
-        try {
-          console.log(await account.get());
-        } catch (error) {
-            console.log("Error getting user data", error)
-        }
-      }}>
+      <Pressable
+        onPress={async () => {
+          try {
+            console.log(await account.get());
+            console.log("SESSION",
+              await account.getSession("current")
+            );
+          } catch (error) {
+            console.log("Error getting user data", error);
+          }
+        }}
+      >
         <Text style={styles.btn}>Get current account details</Text>
       </Pressable>
       <Pressable onPress={authService.oAuthLogin}>

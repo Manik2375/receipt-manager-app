@@ -1,4 +1,4 @@
-import { Client, Databases, Account} from "react-native-appwrite";
+import { Client, TablesDB, Account} from "react-native-appwrite";
 
 export const client = new Client();
 client
@@ -7,6 +7,6 @@ client
   .setDevKey(process.env.EXPO_PUBLIC_DEV_KEY ?? "")
   .setPlatform('com.receipt.manager.com');
 
-
+  
 export const account = new Account(client);
-export const databases = new Databases(client);
+export const tablesDB = new TablesDB(client);
