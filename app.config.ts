@@ -7,7 +7,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: `appwrite-callback-${process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ?? ""}`,
+  scheme: `appwrite-callback-${
+    process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID ?? ""
+  }`,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   splash: {
@@ -30,7 +32,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     output: "static",
     favicon: "./assets/images/favicon.png",
   },
-  plugins: ["expo-router", "expo-image-picker"],
+  plugins: [
+    "expo-router",
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "The app accesses your photos to let you share them with your friends.",
+      },
+    ],
+  ],
   experiments: {
     typedRoutes: true,
   },

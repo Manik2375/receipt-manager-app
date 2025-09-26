@@ -28,6 +28,11 @@ const authService = {
         name,
       });
 
+      await account.createEmailPasswordSession({ email, password });
+
+      await account.createVerification({
+        url: `${process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT}/verify-email`,
+      }); 
       // The action is completed despite the error. Have to work on verificiaton
       await tablesDB.createRow({
         databaseId: DATABASE_ID,
@@ -44,7 +49,7 @@ const authService = {
         ],
       });
     } catch (error: unknown) {
-      console.error("Error in signUp service function\n",error);
+      console.error("Error in signUp service function\n", error);
       if (typeof error === "object" && error) {
         throw (error as AppwriteException).message;
       } else throw error;
@@ -120,7 +125,7 @@ const authService = {
       console.log("Logging ", email);
       await account.createEmailPasswordSession({ email, password });
     } catch (error: unknown) {
-      console.error("Error in login service function\n", error)
+      console.error("Error in login service function\n", error);
       if (typeof error === "object" && error) {
         throw (error as AppwriteException).message;
       } else throw error;

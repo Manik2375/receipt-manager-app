@@ -1,11 +1,45 @@
-import { StyleSheet } from 'react-native';
-import { Text, View } from '@/src/components/Themed';
+import { StyleSheet, Button, Image, Alert } from "react-native";
+import { Text, View } from "@/src/components/Themed";
+import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import { uploadImage } from '@/src/services/receipt';
 
 export default function TabTwoScreen() {
+  const [image, setImage] = useState<string | null>(null);
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "videos"],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if(result.canceled) {
+      Alert.alert("Error", "Error getting image");
+      return;
+    }
+    const uri = result.assets[0].uri;
+    setImage(uri);
+
+    try {
+      await uploadImage(uri);
+    } catch (error) {
+      console.error(error);
+    }
+
+
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Uploading files</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+      <View
+        style={styles.separator}
+        lightColor="#eee"
+        darkColor="rgba(255,255,255,0.1)"
+      />
+
+      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {image && <Image source={{ uri: image }} style={styles.image} />}
     </View>
   );
 }
@@ -13,16 +47,20 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   separator: {
     marginVertical: 30,
     height: 1,
-    width: '80%',
+    width: "80%",
+  },
+  image: {
+    width: 200,
+    height: 200,
   },
 });
