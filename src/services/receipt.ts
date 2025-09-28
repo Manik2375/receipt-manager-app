@@ -1,4 +1,10 @@
-import { AppwriteException, ID, Permission, Role } from "react-native-appwrite";
+import {
+  AppwriteException,
+  ID,
+  Permission,
+  Query,
+  Role,
+} from "react-native-appwrite";
 import { storage, tablesDB } from "../lib/appwrite";
 import authService from "./auth";
 
@@ -48,13 +54,13 @@ export async function uploadImage({ url }: { url: string }) {
 export async function addReceiptData({
   name,
   date,
-  type,
   imageId,
+  endDate
 }: {
   name: string;
   date: string;
-  type: string;
   imageId: string;
+  endDate: string;
 }) {
   try {
     const receiptId = ID.unique();
@@ -68,8 +74,8 @@ export async function addReceiptData({
         user: userId,
         name,
         date,
-        type,
         imageId,
+        endDate
       },
       permissions: [
         Permission.read(Role.user(userId)),
@@ -86,15 +92,14 @@ export async function addReceiptData({
   }
 }
 
-export async function deleteReceipt({ receiptID }: { receiptID: string }) {
+export async function deleteReceipt({ receiptId }: { receiptId: string }) {
   try {
     const receipt = await tablesDB.getRow({
       databaseId: DATABASE_ID ?? "",
       tableId: "receipt",
-      rowId: receiptID,
+      rowId: receiptId,
       queries: [],
     });
-    const imageId = receipt.imageId;
 
     await storage.deleteFile({
       bucketId: BUCKET_ID ?? "",
@@ -103,12 +108,60 @@ export async function deleteReceipt({ receiptID }: { receiptID: string }) {
     await tablesDB.deleteRow({
       databaseId: DATABASE_ID ?? "",
       tableId: "receipt",
-      rowId: receiptID,
+      rowId: receiptId,
     });
 
     return { success: true };
   } catch (error) {
     console.error("Error in deleteReceipt function\n", error);
+    if (typeof error === "object" && error) {
+      throw (error as AppwriteException).message;
+    } else throw error;
+  }
+}
+
+export async function getReceiptsForUser() {
+  try {
+    const userId = await authService.getUserID();
+    const userData = await tablesDB.getRow({
+      databaseId: DATABASE_ID ?? "",
+      tableId: "users",
+      rowId: userId,
+      queries: [Query.select(["*", "receipt.*"])],
+    });
+
+    console.log(JSON.stringify(userData, null, 2));
+
+    return userData.receipt;
+  } catch (error) {
+    console.error("Error in getReceiptsForUser function\n", error);
+    if (typeof error === "object" && error) {
+      throw (error as AppwriteException).message;
+    } else throw error;
+  }
+}
+
+export async function updateReceiptData({
+  receiptId,
+  name,
+  endDate,
+}: {
+  receiptId: string;
+  name: string;
+  endDate: string;
+}) {
+  try {
+     await tablesDB.updateRow({
+      databaseId: DATABASE_ID ?? "",
+      tableId: "receipt",
+      rowId: receiptId,
+      data: {
+        name,
+        endDate,
+      },
+    });
+  } catch (error) {
+    console.error("Error in getReceiptsForUser function\n", error);
     if (typeof error === "object" && error) {
       throw (error as AppwriteException).message;
     } else throw error;
