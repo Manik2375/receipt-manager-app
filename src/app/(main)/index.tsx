@@ -2,7 +2,7 @@ import { StyleSheet, Button, Image, Alert } from "react-native";
 import { Text, View } from "@/src/components/Themed";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { addReceiptData, uploadImage } from '@/src/services/receipt';
+import { addReceiptData, uploadImage, deleteReceipt } from '@/src/services/receipt';
 
 export default function TabTwoScreen() {
   const [image, setImage] = useState<string | null>(null);
@@ -22,19 +22,20 @@ export default function TabTwoScreen() {
     setImage(uri);
 
     try {
-      await uploadImage(uri);
+      const imageId = await uploadImage({url: uri});
       await addReceiptData({
         name: "testing", 
         date: "22-05-2005",
-        type: "electronics"
+        type: "electronics",
+        imageId
       })
     } catch (error) {
       console.log(error);
       Alert.alert("error", String(error));
     }
-
-
   };
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Uploading files</Text>
@@ -45,6 +46,9 @@ export default function TabTwoScreen() {
       />
 
       <Button title="Pick an image from camera roll" onPress={pickImage} />
+      <Button title="Delete the receipt" onPress={() => {
+        deleteReceipt({receiptID: "68d93f0c003b9ad989f1"})
+      }} />
       {image && <Image source={{ uri: image }} style={styles.image} />}
     </View>
   );
