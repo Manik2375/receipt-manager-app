@@ -131,6 +131,14 @@ const authService = {
       } else throw error;
     }
   },
+  async getUserID() {
+    try {
+      const acc = await account.get();
+      return acc.$id
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default authService;

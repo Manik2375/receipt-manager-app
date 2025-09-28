@@ -2,7 +2,7 @@ import { StyleSheet, Button, Image, Alert } from "react-native";
 import { Text, View } from "@/src/components/Themed";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { uploadImage } from '@/src/services/receipt';
+import { addReceiptData, uploadImage } from '@/src/services/receipt';
 
 export default function TabTwoScreen() {
   const [image, setImage] = useState<string | null>(null);
@@ -10,7 +10,7 @@ export default function TabTwoScreen() {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [3, 4],
       quality: 1,
     });
 
@@ -23,8 +23,14 @@ export default function TabTwoScreen() {
 
     try {
       await uploadImage(uri);
+      await addReceiptData({
+        name: "testing", 
+        date: "22-05-2005",
+        type: "electronics"
+      })
     } catch (error) {
-      console.error(error);
+      console.log(error);
+      Alert.alert("error", String(error));
     }
 
 
