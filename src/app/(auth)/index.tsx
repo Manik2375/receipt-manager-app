@@ -1,10 +1,12 @@
 import { Alert, Pressable, StyleSheet, TextInput } from "react-native";
-import { Text, View } from "@/src/components/Themed";
+import { Text, View } from "react-native";
 import { useState } from "react";
 import { z } from "zod";
 import { account } from "@/src/lib/appwrite";
 
 import authService from "@/src/services/auth";
+import { Redirect } from "expo-router";
+import { useEffect } from "react";
 
 const SignUpSchema = z.object({
   email: z
@@ -14,30 +16,67 @@ const SignUpSchema = z.object({
 });
 
 export default function TabOneScreen() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  useEffect(() => {
+    checkAuthStatus();
+  }, [isLoggedIn]);
 
-  const handleSignUp = async () => {
-    const formTest = SignUpSchema.safeParse({ email, password });
-
-    if (!formTest.success) {
-      const error = z.prettifyError(formTest.error);
-      Alert.alert("Error", error);
-      return;
-    }
-
+  async function checkAuthStatus() {
     try {
-      await authService.signUp({ email, password });
-      Alert.alert("Logged in ");
+      setLoading(true);
+      await authService.getUserID();
+      setIsLoggedIn(true);
     } catch (error) {
-      Alert.alert("Problem signing up", String(error));
-      console.log(error);
+      console.log(String(error));
+      setIsLoggedIn(false);
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+
+  const loginHandler = async () => {
+    try {
+      setLoading(true);
+      await authService.oAuthLogin();
+      setIsLoggedIn(true);
+    } catch (error) {
+      Alert.alert("error", String(error));
+    }
+    finally {
+      setLoading(false);
+    }
+    
+  }
+
+  // const [email, setEmail] = useState<string>("");
+  // const [password, setPassword] = useState<string>("");
+
+  // const handleSignUp = async () => {
+  //   const formTest = SignUpSchema.safeParse({ email, password });
+
+  //   if (!formTest.success) {
+  //     const error = z.prettifyError(formTest.error);
+  //     Alert.alert("Error", error);
+  //     return;
+  //   }
+
+  //   try {
+  //     await authService.signUp({ email, password });
+  //     Alert.alert("Logged in ");
+  //   } catch (error) {
+  //     Alert.alert("Problem signing up", String(error));
+  //     console.log(error);
+  //   }
+  // };
+
+  if (isLoggedIn) {
+    return <Redirect href="/(main)" />;
+  }
 
   return (
     <View style={styles.container}>
-      <TextInput
+      {/* <TextInput
         style={styles.input}
         value={email}
         onChangeText={setEmail}
@@ -49,10 +88,10 @@ export default function TabOneScreen() {
         onChangeText={setPassword}
         placeholder="Password"
         secureTextEntry={true}
-      />
-      <Pressable onPress={handleSignUp}>
+      /> */}
+      {/* <Pressable onPress={handleSignUp}>
         <Text style={styles.btn}>Sign up</Text>
-      </Pressable>
+      </Pressable> */}
       <Pressable
         onPress={async () => {
           try {
@@ -69,9 +108,7 @@ export default function TabOneScreen() {
         onPress={async () => {
           try {
             console.log(await account.get());
-            console.log("SESSION",
-              await account.getSession("current")
-            );
+            console.log("SESSION", await account.getSession("current"));
           } catch (error) {
             console.log("Error getting user data", error);
           }
@@ -79,8 +116,8 @@ export default function TabOneScreen() {
       >
         <Text style={styles.btn}>Get current account details</Text>
       </Pressable>
-      <Pressable onPress={authService.oAuthLogin}>
-        <Text style={styles.btn}>Sign up using google</Text>
+      <Pressable onPress={loginHandler}>
+        <Text style={styles.btn}>{loading ? "Loading...." : "Sign up using google"}</Text>
       </Pressable>
     </View>
   );

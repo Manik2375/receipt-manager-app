@@ -130,8 +130,6 @@ export async function getReceiptsForUser() {
       queries: [Query.select(["*", "receipt.*"])],
     });
 
-    console.log(JSON.stringify(userData, null, 2));
-
     return userData.receipt;
   } catch (error) {
     console.error("Error in getReceiptsForUser function\n", error);
