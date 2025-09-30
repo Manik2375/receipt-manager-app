@@ -1,4 +1,4 @@
-import { Alert, Pressable, StyleSheet, TextInput } from "react-native";
+import { Alert, Pressable, StyleSheet, TextInput, Image } from "react-native";
 import { Text, View } from "react-native";
 import { useState } from "react";
 import { z } from "zod";
@@ -31,7 +31,7 @@ export default function TabOneScreen() {
       console.log(String(error));
       setIsLoggedIn(false);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -42,12 +42,10 @@ export default function TabOneScreen() {
       setIsLoggedIn(true);
     } catch (error) {
       Alert.alert("error", String(error));
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
-    
-  }
+  };
 
   // const [email, setEmail] = useState<string>("");
   // const [password, setPassword] = useState<string>("");
@@ -92,7 +90,7 @@ export default function TabOneScreen() {
       {/* <Pressable onPress={handleSignUp}>
         <Text style={styles.btn}>Sign up</Text>
       </Pressable> */}
-      <Pressable
+      {/* <Pressable
         onPress={async () => {
           try {
             await account.deleteSession("current");
@@ -114,10 +112,33 @@ export default function TabOneScreen() {
           }
         }}
       >
-        <Text style={styles.btn}>Get current account details</Text>
-      </Pressable>
+        <Text style={styles.btn}>Get current account details</Text> 
+       </Pressable> */}
+      <View
+        style={{
+          display: "flex",
+          gap: 20,
+        }}
+      >
+        <Image
+          source={require("../../../assets/images/logo.jpeg")}
+          resizeMode="contain"
+          style={{
+            width: 200,
+            height: 200,
+            marginInline: "auto",
+            borderRadius: 50,
+          }}
+        />
+        <View>
+          <Text style={styles.specialTxt}>- Manage your warranty slips</Text>
+          <Text style={styles.specialTxt}>- Backup everything in cloud</Text>
+        </View>
+      </View>
       <Pressable onPress={loginHandler}>
-        <Text style={styles.btn}>{loading ? "Loading...." : "Sign up using google"}</Text>
+        <Text style={styles.btn}>
+          {loading ? "Loading...." : "Sign up using google"}
+        </Text>
       </Pressable>
     </View>
   );
@@ -128,6 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    padding: 20,
   },
   input: {
     height: 40,
@@ -137,12 +159,16 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   btn: {
-    padding: 10,
+    fontSize: 25,
+    padding: 20,
     backgroundColor: "royalblue",
     borderRadius: 10,
     alignItems: "center",
     color: "white",
     fontWeight: "bold",
-    marginTop: 20,
+    marginTop: 60,
+  },
+  specialTxt: {
+    fontSize: 25,
   },
 });

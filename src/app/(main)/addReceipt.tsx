@@ -13,9 +13,9 @@ import { StyleSheet } from "react-native";
 
 import * as ImagePicker from "expo-image-picker";
 import { addReceiptData, uploadImage } from "@/src/services/receipt";
-import { date } from "zod";
 
 export default function addReceiptPage() {
+  const [loading, setLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
   const [endDate, setEndDate] = useState<number>(Date.now());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -60,6 +60,9 @@ export default function addReceiptPage() {
         onChangeText={setName}
         placeholder="Receipt name"
       />
+      <View>
+        <Text>Current Date selected:{formatDate(new Date(endDate))}</Text>
+      </View>
       <View style={styles.btn}>
         <Button
           title="Chose the last date for receipt"
@@ -68,9 +71,7 @@ export default function addReceiptPage() {
           }}
         />
       </View>
-      <View>
-        <Text>Current Date selected:{formatDate(new Date(endDate))}</Text>
-      </View>
+
       <View style={styles.btn}>
         <Button title="Pick an image from camera roll" onPress={pickImage} />
       </View>
@@ -87,30 +88,33 @@ export default function addReceiptPage() {
       )}
 
       <Pressable
+        disabled={loading}
         onPress={async () => {
           try {
             if (!image || !name) {
               Alert.alert("Error", "Add all fields first");
               return;
             }
+            setLoading(true);
             const imageId = await uploadImage({ url: image });
             await addReceiptData({
               name: name,
               date: formatDate(new Date()),
-              endDate: "22-05-2015",
+              endDate: formatDate(new Date(endDate)),
               imageId,
             });
-            Alert.alert("Success", "Receipt added successfully");
+            Alert.alert("Success", "Receipt added successfully. Refresh the page");
             setImage("");
             setName("");
-            
           } catch (error) {
             console.log(error);
             Alert.alert("error", String(error));
+          } finally {
+            setLoading(false);
           }
         }}
       >
-        <Text style={styles.btnSpecial}>Add receipt</Text>
+        <Text style={styles.btnSpecial}>{loading ? "Adding receipt..." : "Add Receipt" }</Text>
       </Pressable>
     </View>
   );
@@ -123,6 +127,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#f8f9fa",
+    display: "flex", 
+    gap: 10
   },
   input: {
     height: 40,
@@ -146,6 +152,6 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 22,
     borderRadius: 10,
-    marginInline: "auto"
+    marginInline: "auto",
   },
 });

@@ -2,8 +2,8 @@ import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "receipt-tracker",
-  slug: "receipt-tracker",
+  name: "Warranty Plus",
+  slug: "receipt-manager",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/logo.jpeg",
@@ -26,6 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: "#ffffff",
     },
     edgeToEdgeEnabled: true,
+    package: "com.receipt.manager.com"
   },
   web: {
     bundler: "metro",
@@ -44,5 +45,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ],
   experiments: {
     typedRoutes: true,
+  },
+  extra: {
+    eas: {
+      projectId: "5c82f0c6-d3a8-40bb-8826-fdbd5de5a093",
+    },
   },
 });
